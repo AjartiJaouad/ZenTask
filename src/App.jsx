@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // On ajoute useEffect
 import TaskInput from './components/TaskInput';
 import TaskList from './components/TaskList';
 import './App.css';
 
 function App() {
-  const [tasks, setTasks] = useState([]);
+  // 1. On initialise avec ce qu'il y a dans le localStorage (ou un tableau vide)
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('zen-tasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
+
+  // 2. À chaque fois que la liste 'tasks' change, on sauvegarde
+  useEffect(() => {
+    localStorage.setItem('zen-tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   const addTask = (title) => {
     const newTask = {
