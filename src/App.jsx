@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'; // On ajoute useEffect
-import TaskInput from './components/TaskInput';
-import TaskList from './components/TaskList';
+import { useState, useEffect } from 'react';
+import TaskInput from './components/TaskInput.jsx';
+import TaskList from './components/TaskList.jsx';
+import Filter from './components/Filter';
 import './App.css';
 
 function App() {
-  // 1. On initialise avec ce qu'il y a dans le localStorage (ou un tableau vide)
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem('zen-tasks');
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
 
-  // 2. À chaque fois que la liste 'tasks' change, on sauvegarde
+  // 1. Nouvel état pour savoir quel filtre est actif
+  const [filter, setFilter] = useState('all'); 
+
   useEffect(() => {
     localStorage.setItem('zen-tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -35,11 +37,23 @@ function App() {
     ));
   };
 
+  // 2. Logique de filtrage : on crée une liste filtrée avant l'affichage
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'completed') return task.completed;
+    if (filter === 'active') return !task.completed;
+    return true; // pour 'all'
+  });
+
   return (
     <div className="App">
-      <h1>ZenTask </h1>
+      <h1>ZenTask 🧘‍♂️</h1>
       <TaskInput onAddTask={addTask} />
-      <TaskList tasks={tasks} onDelete={deleteTask} onToggle={toggleTask} />
+      
+      {/* 3. On affiche le composant de filtre */}
+      <Filter currentFilter={filter} onFilterChange={setFilter} />
+      
+      {/* 4. IMPORTATION CRUCIALE : On donne filteredTasks au lieu de tasks */}
+      <TaskList tasks={filteredTasks} onDelete={deleteTask} onToggle={toggleTask} />
     </div>
   );
 }
